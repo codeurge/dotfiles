@@ -61,6 +61,9 @@ function checkShell {
   esac
 }
 
+echo "[Git] > Checking if Git is installed..."
+checkCommand git
+
 echo "[Shell] > Checking if ZSH is installed..."
 checkCommand zsh
 checkShell
@@ -80,6 +83,7 @@ checkCommand ag
 echo -e
 
 echo "[Config] > Checking config symlinks..."
+linkDotfile .gitconfig
 linkDotfile .config/nvim
 linkDotfile .tmux.conf
 linkDotfile .zshrc

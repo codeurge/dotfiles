@@ -1,0 +1,15 @@
+[color]
+  ui = true
+[core]
+  autocrlf = input
+  safecrlf = true
+  untrackedCache = true
+  excludesfile = ~/.gitignore_global
+[diff]
+  indentHeuristic = true
+[include]
+  path = ~/.gitconfig.local
+[merge]
+  tool = opendiff
+[push]
+  default = simple
