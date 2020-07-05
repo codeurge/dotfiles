@@ -1,0 +1,64 @@
+#!/bin/bash
+dotfilesDir=$(pwd)
+
+function linkDotfile {
+  dest="${HOME}/${1}"
+  dateStr=$(date +%Y-%m-%d-%H%M)
+
+  if [ -h ~/${1} ]; then
+    # Existing symlink 
+    echo "Removing existing symlink: ${dest}"
+    rm ${dest} 
+
+  elif [ -f "${dest}" ]; then
+    # Existing file
+    echo "Backing up existing file: ${dest}"
+    mv ${dest}{,.${dateStr}}
+
+  elif [ -d "${dest}" ]; then
+    # Existing dir
+    echo "Backing up existing dir: ${dest}"
+    mv ${dest}{,.${dateStr}}
+  fi
+
+  echo "Creating new symlink: ${dest}"
+  ln -s ${dotfilesDir}/${1} ${dest}
+}
+
+function installPackage {
+  if [ "$(uname)" == "Darwin" ]; then
+    sudo brew install ${1}
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    sudo apt-get install -y ${1}
+  fi
+}
+
+function checkCommand {
+  echo "> [${2} Packages] Checking if ${1} is installed"
+  command -v ${1}>/dev/null 2>&1 || { 
+    echo >&2 "I require ${1} but it's not installed. Installing ${1}...";
+    installPackage ${1}
+  }
+  echo "${1} is installed"
+}
+
+echo "[Packages] > Checking Dependencies..."
+checkCommand tmux
+checkCommand tig
+checkCommand nvim
+echo "> [nvim Packages] > Checking nvim dependencies..."
+checkCommand python3 nvim
+checkCommand python2 nvim
+checkCommand ruby nvim
+checkCommand ag nvim
+
+linkDotfile .config/nvim
+linkDotfile .tmux.conf
+linkDotfile .zshrc
+linkDotfile .tigrc
+
+echo "[vim-plug] > Installing/updating vim-plug"
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+echo "[vim] > Initializing vim"
+nvim +PluginInstall +qall
