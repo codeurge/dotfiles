@@ -34,31 +34,65 @@ function installPackage {
 }
 
 function checkCommand {
-  echo "> [${2} Packages] Checking if ${1} is installed"
-  command -v ${1}>/dev/null 2>&1 || { 
-    echo >&2 "I require ${1} but it's not installed. Installing ${1}...";
+  if hash ${1} 2>/dev/null; then
+    echo "${1} is already installed"
+  else
+    echo "I require ${1} but it's not installed. Installing ${1}..."
     installPackage ${1}
-  }
-  echo "${1} is installed"
+    echo "${1} is installed"
+  fi
 }
+
+function checkShell {
+  case $SHELL in
+    */zsh) 
+     # assume Zsh
+     echo "Zsh is default shell"
+     ;;
+    */bash)
+     # assume Bash
+     echo "Bash is default shell, switching to ZSH"
+     sudo chsh -s $(which zsh)
+     ;;
+    *)
+     # assume something else
+     echo "Switching default shell to ZSH"
+     sudo chsh -s $(which zsh)
+  esac
+}
+
+echo "[Shell] > Checking if ZSH is installed..."
+checkCommand zsh
+checkShell
+echo -e
 
 echo "[Packages] > Checking Dependencies..."
 checkCommand tmux
 checkCommand tig
 checkCommand nvim
-echo "> [nvim Packages] > Checking nvim dependencies..."
+echo -e
+
+echo "[Packages] > Checking neovim dependencies..."
 checkCommand python3 nvim
 checkCommand python2 nvim
 checkCommand ruby nvim
 checkCommand ag nvim
+echo -e
 
+echo "[Config] > Checking config symlinks..."
 linkDotfile .config/nvim
 linkDotfile .tmux.conf
 linkDotfile .zshrc
 linkDotfile .tigrc
+echo -e
 
-echo "[vim-plug] > Installing/updating vim-plug"
+echo "[Neovim] > Checking vim installation..."
+echo "[Neovim] > Installing/updating vim-plug"
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-echo "[vim] > Initializing vim"
+echo "[Neovim] > Initializing vim"
 nvim +PluginInstall +qall
+echo "[Neovim] > Plugins Installed"
+echo -e
+
+echo "Dotfiles setup complete"
