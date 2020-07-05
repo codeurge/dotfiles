@@ -73,10 +73,10 @@ checkCommand nvim
 echo -e
 
 echo "[Packages] > Checking neovim dependencies..."
-checkCommand python3 nvim
-checkCommand python2 nvim
-checkCommand ruby nvim
-checkCommand ag nvim
+checkCommand python3
+checkCommand python2
+checkCommand ruby
+checkCommand ag
 echo -e
 
 echo "[Config] > Checking config symlinks..."
